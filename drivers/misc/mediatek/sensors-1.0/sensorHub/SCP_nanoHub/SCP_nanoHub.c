@@ -38,6 +38,7 @@
 #include <linux/math64.h>
 #include <linux/timekeeping.h>
 #include <uapi/linux/sched/types.h>
+#include <linux/mtk_compat_4_19.h>
 
 /* ALGIN TO SCP SENSOR_IPI_SIZE AT FILE CONTEXTHUB_FW.H, ALGIN
  * TO SCP_SENSOR_HUB_DATA UNION, ALGIN TO STRUCT DATA_UNIT_T
@@ -579,7 +580,7 @@ static void SCP_sensorHub_moving_average(union SCP_SENSOR_HUB_DATA *rsp)
 	 * }
 	 */
 	ap_now_time = ktime_get_boot_ns();
-	arch_counter = arch_counter_get_cntvct();
+	arch_counter = mtk_compat_arch_counter_get_cntvct();
 	scp_raw_time = rsp->notify_rsp.scp_timestamp;
 	ipi_transfer_time = arch_counter_to_ns(arch_counter -
 		rsp->notify_rsp.arch_counter);
@@ -601,11 +602,11 @@ static void SCP_sensorHub_notify_cmd(union SCP_SENSOR_HUB_DATA *rsp,
 	case SCP_DIRECT_PUSH:
 	case SCP_FIFO_FULL:
 		mark_timestamp(0, GOT_IPI, ktime_get_boot_ns(), 0);
-		mark_ipi_timestamp(arch_counter_get_cntvct() -
+		mark_ipi_timestamp(mtk_compat_arch_counter_get_cntvct() -
 			rsp->notify_rsp.arch_counter);
 #ifdef DEBUG_PERFORMANCE_HW_TICK
 		pr_notice("[Performance] AP_get_ipi Stanley kernel tick:%llu\n",
-			arch_counter_get_cntvct());
+			mtk_compat_arch_counter_get_cntvct());
 
 #endif
 		SCP_sensorHub_moving_average(rsp);
@@ -1212,7 +1213,7 @@ static int sensor_send_timestamp_wake_locked(void)
 	/* send_timestamp_to_hub is process context, disable irq is safe */
 	local_irq_disable();
 	now_time = ktime_get_boot_ns();
-	arch_counter = arch_counter_get_cntvct();
+	arch_counter = mtk_compat_arch_counter_get_cntvct();
 	local_irq_enable();
 	req.set_config_req.sensorType = 0;
 	req.set_config_req.action = SENSOR_HUB_SET_TIMESTAMP;

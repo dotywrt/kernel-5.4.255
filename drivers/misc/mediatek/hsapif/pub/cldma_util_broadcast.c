@@ -26,6 +26,7 @@
 #include<mt-plat/mtk_ccci_common.h>
 #include "ccci_msg_id.h"
 #include "ccci_fsm_cldma.h"
+#include <linux/mtk_compat_4_19.h>
 #endif
 
 #define TAG "cldma_bc"
@@ -184,7 +185,7 @@ void inject_host_pcie_status_event(int cldma_id, int event_type, char reason[])
 	int i;
 	unsigned long flag;
 
-	do_gettimeofday(&time_stamp);
+	mtk_compat_do_gettimeofday(&time_stamp);
 
 	spin_lock_irqsave(&s_host_event_update_lock, flag);
 	save_last_host_pcie_status(0, &time_stamp, event_type, reason);

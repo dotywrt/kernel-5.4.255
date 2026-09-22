@@ -12,6 +12,7 @@
 
 #include "btif_dma_priv.h"
 #include "mtk_btif.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define DMA_USER_ID "btif_driver"
 
@@ -746,12 +747,12 @@ int hal_tx_dma_irq_handler(struct _MTK_DMA_INFO_STR_ *p_dma_info)
 	valid_size = BTIF_READ32(TX_DMA_VFF_VALID_SIZE(base));
 	left_len = BTIF_READ32(TX_DMA_VFF_LEFT_SIZE(base));
 	if (flush_irq_counter == 0)
-		do_gettimeofday(&start_timer);
+		mtk_compat_do_gettimeofday(&start_timer);
 	if ((valid_size > 0) && (valid_size < 8)) {
 		i_ret = _tx_dma_flush(p_dma_info);
 		flush_irq_counter++;
 		if (flush_irq_counter >= MAX_CONTINUOUS_TIMES) {
-			do_gettimeofday(&end_timer);
+			mtk_compat_do_gettimeofday(&end_timer);
 /*
  * when btif tx fifo cannot accept any data and counts of bytes left
  * in tx vfifo < 8 for a while

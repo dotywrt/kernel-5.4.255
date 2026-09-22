@@ -18,6 +18,7 @@
 #include <mtk_lp_plat_reg.h>
 #include <mtk_lp_plat_apmcu.h>
 #include <mtk_lp_plat_apmcu_mbox.h>
+#include <linux/mtk_compat_4_19.h>
 
 void __iomem *cpu_pm_mcusys_base;
 void __iomem *cpu_pm_syssram_base;
@@ -233,7 +234,7 @@ static int mtk_lp_plat_wait_depd_condition(void *arg)
 			mcupm_rdy = true;
 
 		if (!boot_time_pass) {
-			get_monotonic_boottime(&uptime);
+			mtk_compat_get_monotonic_boottime(&uptime);
 
 			if ((unsigned int)uptime.tv_sec > BOOT_TIME_LIMIT)
 				boot_time_pass = true;

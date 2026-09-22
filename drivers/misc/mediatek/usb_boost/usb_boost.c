@@ -15,6 +15,7 @@
 #include <linux/kdev_t.h>
 
 #include "usb_boost.h"
+#include <linux/mtk_compat_4_19.h>
 #define USB_BOOST_CLASS_NAME "usb_boost"
 enum{
 	ATTR_ENABLE,
@@ -243,7 +244,7 @@ static void dump_info(int id)
 }
 static int update_time(int id)
 {
-	do_gettimeofday(&boost_inst[id].tv_ref_time);
+	mtk_compat_do_gettimeofday(&boost_inst[id].tv_ref_time);
 	USB_BOOST_DBG("id:%d, ref<%d,%d>\n", id,
 		(int)boost_inst[id].tv_ref_time.tv_sec,
 		(int)boost_inst[id].tv_ref_time.tv_usec);
@@ -256,7 +257,7 @@ static bool check_timeout(int id)
 	int diff_sec;
 
 	ref = &boost_inst[id].tv_ref_time;
-	do_gettimeofday(&tv);
+	mtk_compat_do_gettimeofday(&tv);
 	diff_sec = tv.tv_sec - ref->tv_sec;
 	if (diff_sec >= boost_inst[id].para[ATTR_TIMEOUT]) {
 		USB_BOOST_DBG("id<%d>, cur<%d,%d>, ref<%d,%d>\n",
@@ -345,7 +346,7 @@ static void test_loops(int id)
 	int n;
 	struct timeval tv_before, tv_after;
 #define TEST_LOOP 100000
-	do_gettimeofday(&tv_before);
+	mtk_compat_do_gettimeofday(&tv_before);
 	if (id < 0) {
 		for (n = 0; n < TEST_LOOP; n++)
 			usb_boost();
@@ -353,7 +354,7 @@ static void test_loops(int id)
 		for (n = 0; n < TEST_LOOP; n++)
 			usb_boost_by_id(id);
 	}
-	do_gettimeofday(&tv_after);
+	mtk_compat_do_gettimeofday(&tv_after);
 	test_diff_sec = tv_after.tv_sec - tv_before.tv_sec;
 	test_diff_usec = tv_after.tv_usec - tv_before.tv_usec;
 	USB_BOOST_NOTICE("id<%d>, loops:%d, spent %d sec, %d usec\n",

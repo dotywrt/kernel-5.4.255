@@ -42,12 +42,13 @@ struct profile_entry_string profile_entry_str[] = {
 	{PROFILE_ENTRY_INVOKE_COMMAND, STR(INVOKE_COMMAND)},
 };
 
-#define GET_START_TIME() do_gettimeofday(&start_time)
-#define GET_END_TIME() do_gettimeofday(&end_time)
+#define GET_START_TIME() mtk_compat_do_gettimeofday(&start_time)
+#define GET_END_TIME() mtk_compat_do_gettimeofday(&end_time)
 
 #define SEC_TO_US(s) (s * 1000000)
 
 #include <asm/div64.h>
+#include <linux/mtk_compat_4_19.h>
 static inline u64 u64_div(u64 n, u64 base)
 {
 	do_div(n, base);

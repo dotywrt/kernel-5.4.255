@@ -84,6 +84,14 @@ struct ctl_table;
 
 extern int suppress_printk;
 
+
+#ifdef CONFIG_LOG_TOO_MUCH_WARNING
+void set_detect_count(int count);
+int get_detect_count(void);
+void set_logtoomuch_enable(int value);
+int get_logtoomuch_enable(void);
+#endif
+
 struct va_format {
 	const char *fmt;
 	va_list *va;

@@ -11,6 +11,7 @@
 #include <linux/delay.h>
 #include "tpd.h"
 #include "met_ftrace_touch.h"
+#include <linux/mtk_compat_4_19.h>
 
 #ifdef TPD_DEBUG_CODE
 int tpd_fail_count;
@@ -37,7 +38,7 @@ void tpd_debug_set_time(void)
 	if (!tpd_debug_time && !tpd_em_log)
 		return;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	tpd_last_2_int_time[0] = tpd_last_2_int_time[1];
 	tpd_last_2_int_time[1] = (t.tv_sec & 0xFFF) * 1000000 + t.tv_usec;
 
@@ -259,7 +260,7 @@ noinline void MET_touch(int raw_x, int raw_y,
 {
 	struct timeval t;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	if ((tpd_down_status == 0 && down == 1) ||
 		(tpd_down_status == 1 && down == 0)) {
 		trace_MET_touch("EV_KEY",
@@ -332,7 +333,7 @@ void tpd_em_log_store(int raw_x, int raw_y,
 		pr_info("not buffer\n");
 		return;
 	}
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 
 	if (down == TPD_TYPE_INT_DOWN) {
 		snprintf(buffer, tpd_log_line_buffer,

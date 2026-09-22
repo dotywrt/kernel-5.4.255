@@ -40,6 +40,7 @@
 
 #ifdef MDP_MMPATH
 #include "mmpath.h"
+#include <linux/mtk_compat_4_19.h>
 #endif	/* MDP_MMPATH */
 
 #ifndef PMQOS_VERSION2
@@ -2197,7 +2198,7 @@ static void cmdq_mdp_begin_task_virtual(struct cmdqRecStruct *handle,
 		kzalloc(sizeof(struct mdp_pmqos_record), GFP_KERNEL);
 	handle->user_private = pmqos_curr_record;
 
-	do_gettimeofday(&curr_time);
+	mtk_compat_do_gettimeofday(&curr_time);
 
 	CMDQ_LOG_PMQOS("enter %s with handle:0x%p engine:0x%llx thread:%u\n",
 		__func__, handle, handle->engineFlag, handle->thread);
@@ -2479,7 +2480,7 @@ static void cmdq_mdp_end_task_virtual(struct cmdqRecStruct *handle,
 #if IS_ENABLED(CONFIG_MTK_SMI_EXT) && IS_ENABLED(CONFIG_MACH_MT6771)
 	smi_larb_mon_act_cnt();
 #endif
-	do_gettimeofday(&curr_time);
+	mtk_compat_do_gettimeofday(&curr_time);
 	CMDQ_LOG_PMQOS("enter %s with handle:0x%p engine:0x%llx\n", __func__,
 		handle, handle->engineFlag);
 

@@ -8,6 +8,7 @@
 #include "inc/accel_factory.h"
 #include "sensor_performance.h"
 #include <linux/vmalloc.h>
+#include <linux/mtk_compat_4_19.h>
 
 struct acc_context *acc_context_obj /* = NULL*/;
 
@@ -19,7 +20,7 @@ static int64_t getCurNS(void)
 	struct timespec time;
 
 	time.tv_sec = time.tv_nsec = 0;
-	get_monotonic_boottime(&time);
+	mtk_compat_get_monotonic_boottime(&time);
 	ns = time.tv_sec * 1000000000LL + time.tv_nsec;
 
 	return ns;

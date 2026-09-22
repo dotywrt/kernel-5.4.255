@@ -56,6 +56,16 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/printk.h>
 
+
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: MediaTek printk/AEE support */
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+#include <linux/proc_fs.h>
+#include <linux/seq_file.h>
+#include <linux/slab.h>
+#include <mt-plat/aee.h>
+#endif
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: end includes */
+
 #include "console_cmdline.h"
 #include "braille.h"
 #include "internal.h"
@@ -462,6 +472,81 @@ static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
 static char *log_buf = __log_buf;
 static u32 log_buf_len = __LOG_BUF_LEN;
 
+
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: vendor log-rate detector state */
+int printk_too_much_enable;
+
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+static int detect_count = CONFIG_LOG_TOO_MUCH_DETECT_COUNT;
+static bool detect_count_change;
+
+#define DETECT_COUNT_MIN	100
+#define DETECT_TIME		1000000000ULL
+#define DELAY_TIME		(CONFIG_LOG_TOO_MUCH_DETECT_GAP * DETECT_TIME * 60)
+
+static u64 delta_time;
+static u64 delta_count;
+static u64 t_base;
+static bool flag_toomuch;
+
+static char *log_much;
+static int log_count;
+static u32 start_idx;
+static u64 start_seq;
+
+#define LOG_MUCH_PLUS_LEN	(1 << 17)
+
+static void log_much_do_check_and_delay(struct printk_log *msg);
+#endif
+
+void set_detect_count(int count)
+{
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	if (count >= detect_count) {
+		detect_count = count;
+	} else {
+		if (count < DETECT_COUNT_MIN)
+			detect_count = DETECT_COUNT_MIN;
+		else
+			detect_count = count;
+		detect_count_change = true;
+	}
+
+	pr_info("Printk too much criteria: %d delay_flag: %d\n",
+		detect_count, detect_count_change);
+#endif
+}
+EXPORT_SYMBOL(set_detect_count);
+
+int get_detect_count(void)
+{
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	return detect_count;
+#else
+	return 0;
+#endif
+}
+EXPORT_SYMBOL(get_detect_count);
+
+void set_logtoomuch_enable(int value)
+{
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	printk_too_much_enable = value;
+#endif
+}
+EXPORT_SYMBOL(set_logtoomuch_enable);
+
+int get_logtoomuch_enable(void)
+{
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	return printk_too_much_enable;
+#else
+	return 0;
+#endif
+}
+EXPORT_SYMBOL(get_logtoomuch_enable);
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: end vendor state/API */
+
 /*
  * We cannot access per-CPU data (e.g. per-CPU flush irq_work) before
  * per_cpu_areas are initialised. This variable is set to true when
@@ -624,6 +709,11 @@ static int log_store(u32 caller_id, int facility, int level,
 	u32 size, pad_len;
 	u16 trunc_msg_len = 0;
 
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	static u64 start_ts_nsec;
+	static bool initialized;
+#endif
+
 	/* number of '\0' padding bytes to next message */
 	size = msg_used_size(text_len, dict_len, &pad_len);
 
@@ -672,6 +762,45 @@ static int log_store(u32 caller_id, int facility, int level,
 	/* insert message */
 	log_next_idx += msg->len;
 	log_next_seq++;
+
+	/* DOTY-MT6890-LOG-TOO-MUCH-V21: printk rate detector */
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	if (printk_too_much_enable == 1) {
+		if (detect_count_change) {
+			detect_count_change = false;
+			t_base = msg->ts_nsec + DETECT_TIME * 15;
+		}
+
+		if (!flag_toomuch && t_base < msg->ts_nsec) {
+			if (!initialized) {
+				start_ts_nsec = msg->ts_nsec;
+				start_idx = log_next_idx - msg->len;
+				start_seq = log_next_seq - 1;
+				initialized = true;
+			}
+
+			if (start_seq < log_first_seq) {
+				initialized = false;
+				start_seq = log_first_seq;
+				start_idx = log_first_idx;
+				delta_time = msg->ts_nsec -
+					log_from_idx(start_idx)->ts_nsec;
+				delta_count = log_next_seq - start_seq;
+				log_much_do_check_and_delay(msg);
+			} else {
+				delta_time = msg->ts_nsec - start_ts_nsec;
+				delta_count = log_next_seq - start_seq;
+
+				/* Vendor behavior: evaluate every 5 seconds. */
+				if (delta_time > DETECT_TIME * 5) {
+					initialized = false;
+					log_much_do_check_and_delay(msg);
+				}
+			}
+		}
+	}
+#endif
+	/* DOTY-MT6890-LOG-TOO-MUCH-V21: end rate detector */
 
 	return msg->text_len;
 }
@@ -2411,6 +2540,14 @@ void console_unlock(void)
 	unsigned long flags;
 	bool do_cond_resched, retry;
 
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	/* AEE API limits this summary buffer to 63 bytes. */
+	char aee_str[63];
+	int add_len;
+	u64 period;
+	unsigned long rem_nsec;
+#endif
+
 	if (console_suspended) {
 		up_console_sem();
 		return;
@@ -2510,7 +2647,33 @@ skip:
 		console_lock_spinning_enable();
 
 		stop_critical_timings();	/* don't trace print latency */
+
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+		if (flag_toomuch) {
+			flag_toomuch = false;
+
+			add_len = scnprintf(aee_str, sizeof(aee_str),
+				"Printk too much: >%d L/s, L: %llu, ",
+				detect_count, delta_count);
+
+			if (add_len + 12 <= sizeof(aee_str)) {
+				period = delta_time;
+				rem_nsec = do_div(period, 1000000000);
+				scnprintf(aee_str + add_len,
+					sizeof(aee_str) - add_len,
+					"S: %llu.%06lu\n",
+					period, rem_nsec / 1000);
+			}
+
+			aee_kernel_warning_api(__FILE__, __LINE__,
+				DB_OPT_PRINTK_TOO_MUCH | DB_OPT_DUMMY_DUMP,
+				aee_str, "Need to shrink kernel log");
+		} else {
+			call_console_drivers(ext_text, ext_len, text, len);
+		}
+#else
 		call_console_drivers(ext_text, ext_len, text, len);
+#endif
 		start_critical_timings();
 
 		if (console_lock_spinning_disable_and_check()) {
@@ -2941,9 +3104,82 @@ void __init console_init(void)
  * intersects with the init section. Note that all other boot consoles will
  * get unregistred when the real preferred console is registered.
  */
+
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: captured burst /proc interface */
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+static int parse_log_file(void)
+{
+	char buff[LOG_LINE_MAX + PREFIX_MAX];
+	u32 log_index = start_idx;
+	u64 log_seq = start_seq;
+	size_t count;
+	struct printk_log *msg;
+
+	if (!log_much)
+		return -ENOMEM;
+
+	log_count = 0;
+
+	while (log_seq < log_next_seq) {
+		msg = log_from_idx(log_index);
+		count = msg_print_text(msg, true, printk_time,
+				       buff, sizeof(buff));
+
+		if (log_count + count > log_buf_len + LOG_MUCH_PLUS_LEN)
+			break;
+
+		memcpy(log_much + log_count, buff, count);
+		log_count += count;
+		log_index = log_next(log_index);
+		log_seq++;
+	}
+
+	return 0;
+}
+
+static void log_much_do_check_and_delay(struct printk_log *msg)
+{
+	if (delta_count * DETECT_TIME > detect_count * delta_time) {
+		if (!parse_log_file()) {
+			t_base = msg->ts_nsec + DELAY_TIME;
+			flag_toomuch = true;
+		}
+	}
+}
+
+static int log_much_show(struct seq_file *m, void *v)
+{
+	if (!log_much) {
+		seq_puts(m, "log buff is null.\n");
+		return 0;
+	}
+
+	seq_write(m, log_much, log_count);
+	return 0;
+}
+
+static int log_much_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, log_much_show, inode->i_private);
+}
+
+static const struct file_operations log_much_ops = {
+	.owner = THIS_MODULE,
+	.open = log_much_open,
+	.read = seq_read,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+#endif
+/* DOTY-MT6890-LOG-TOO-MUCH-V21: end proc interface */
+
 static int __init printk_late_init(void)
 {
 	struct console *con;
+
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	struct proc_dir_entry *log_much_entry;
+#endif
 	int ret;
 
 	for_each_console(con) {
@@ -2972,6 +3208,21 @@ static int __init printk_late_init(void)
 	ret = cpuhp_setup_state_nocalls(CPUHP_AP_ONLINE_DYN, "printk:online",
 					console_cpu_notify, NULL);
 	WARN_ON(ret < 0);
+
+#if defined(CONFIG_MTK_ENG_BUILD) && defined(CONFIG_LOG_TOO_MUCH_WARNING)
+	log_much_entry = proc_create("log_much", 0444, NULL, &log_much_ops);
+	if (!log_much_entry) {
+		pr_notice("printk: failed to create proc log_much entry\n");
+		return -ENOMEM;
+	}
+
+	log_much = kmalloc(log_buf_len + LOG_MUCH_PLUS_LEN, GFP_KERNEL);
+	if (!log_much) {
+		proc_remove(log_much_entry);
+		pr_notice("printk: failed to allocate log_much buffer\n");
+		return -ENOMEM;
+	}
+#endif
 	return 0;
 }
 late_initcall(printk_late_init);

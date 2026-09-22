@@ -48,7 +48,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 static inline unsigned long pvr_copy_to_user(void __user *pvTo, const void *pvFrom, unsigned long ulBytes)
 {
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0))
-	if (access_ok(VERIFY_WRITE, pvTo, ulBytes))
+	if (access_ok(pvTo, ulBytes))
 #else
 	if (access_ok(pvTo, ulBytes))
 #endif
@@ -84,7 +84,7 @@ static inline unsigned long pvr_copy_from_user(void *pvTo, const void __user *pv
 	 * Linux 2.6.33 isn't fully compatible with our usage of the function.
 	 */
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0))
-	if (access_ok(VERIFY_READ, pvFrom, ulBytes))
+	if (access_ok(pvFrom, ulBytes))
 #else
 	if (access_ok(pvFrom, ulBytes))
 #endif

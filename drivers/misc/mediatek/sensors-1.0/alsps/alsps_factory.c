@@ -37,11 +37,9 @@ static long alsps_factory_unlocked_ioctl(struct file *file, unsigned int cmd,
 	int als_cali = 0;
 
 	if (_IOC_DIR(cmd) & _IOC_READ)
-		err = !access_ok(VERIFY_WRITE, (void __user *)arg,
-				 _IOC_SIZE(cmd));
+		err = !access_ok((void __user *)arg, _IOC_SIZE(cmd));
 	else if (_IOC_DIR(cmd) & _IOC_WRITE)
-		err = !access_ok(VERIFY_READ, (void __user *)arg,
-				 _IOC_SIZE(cmd));
+		err = !access_ok((void __user *)arg, _IOC_SIZE(cmd));
 
 	if (err) {
 		pr_debug("access error: %08X, (%2d, %2d)\n", cmd,

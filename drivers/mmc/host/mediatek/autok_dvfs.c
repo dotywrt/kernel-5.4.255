@@ -35,7 +35,7 @@ static struct file *msdc_file_open(const char *path, int flags, int rights)
 	int err = 0;
 
 	oldfs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 	filp = filp_open(path, flags, rights);
 	set_fs(oldfs);
 
@@ -56,7 +56,7 @@ static int msdc_file_read(struct file *file, unsigned long long offset,
 	mm_segment_t oldfs;
 
 	oldfs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 
 	ret = vfs_read(file, data, size, &offset);
 
@@ -74,7 +74,7 @@ static int msdc_file_write(struct file *file, unsigned long long offset,
 	mm_segment_t oldfs;
 
 	oldfs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 
 	ret = vfs_write(file, data, size, &offset);
 

@@ -93,6 +93,7 @@ static IMG_HANDLE ghGpuUtilUserDebugFS;
 
 #include <linux/syscalls.h>
 #include <linux/time.h>
+#include <linux/mtk_compat_4_19.h>
 
 typedef struct
 {
@@ -122,7 +123,7 @@ AddToBufferCCB(const IMG_CHAR *pszFileName, IMG_UINT32 ui32Line,
 	gsDebugCCB[giOffset].ui32TID = current->pid;
 	gsDebugCCB[giOffset].ui32PID = current->tgid;
 
-	do_gettimeofday(&gsDebugCCB[giOffset].sTimeVal);
+	mtk_compat_do_gettimeofday(&gsDebugCCB[giOffset].sTimeVal);
 
 	strncpy(gsDebugCCB[giOffset].pcMesg, szBuffer, PVRSRV_DEBUG_CCB_MESG_MAX - 1);
 	gsDebugCCB[giOffset].pcMesg[PVRSRV_DEBUG_CCB_MESG_MAX - 1] = 0;

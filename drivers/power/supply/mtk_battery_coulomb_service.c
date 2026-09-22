@@ -10,6 +10,7 @@
 #include <linux/kthread.h>
 #include <linux/platform_device.h>
 #include "mtk_battery.h"
+#include <linux/mtk_compat_4_19.h>
 
 static void wake_up_gauge_coulomb(struct mtk_battery *gm)
 {
@@ -405,7 +406,7 @@ static int gauge_coulomb_thread(void *arg)
 	while (1) {
 		wait_event(cs->wait_que, (cs->coulomb_thread_timeout == true));
 		cs->coulomb_thread_timeout = false;
-		get_monotonic_boottime(&start);
+		mtk_compat_get_monotonic_boottime(&start);
 
 		mutex_lock(&cs->coulomb_lock);
 		gauge_coulomb_int_handler(cs);
@@ -415,7 +416,7 @@ static int gauge_coulomb_thread(void *arg)
 		__pm_relax(cs->wlock);
 		spin_unlock_irqrestore(&cs->slock, flags);
 
-		get_monotonic_boottime(&end);
+		mtk_compat_get_monotonic_boottime(&end);
 		duraction = timespec_sub(end, start);
 
 		bm_debug(

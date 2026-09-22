@@ -14,6 +14,7 @@
 #include "vdec_ipi_msg.h"
 #include "vdec_drv_if.h"
 #include "vdec_vcu_if.h"
+#include <linux/mtk_compat_4_19.h>
 
 static void handle_init_ack_msg(struct vdec_vpu_ipi_init_ack *msg)
 {
@@ -160,11 +161,11 @@ int vcu_dec_ipi_handler(void *data, unsigned int len, void *priv)
 			break;
 		case VPU_IPIMSG_DEC_WAITISR:
 			/* wait decoder done interrupt */
-			do_gettimeofday(&t_s);
+			mtk_compat_do_gettimeofday(&t_s);
 			mtk_vcodec_wait_for_done_ctx(vcu->ctx,
 				MTK_INST_IRQ_RECEIVED,
 				WAIT_INTR_TIMEOUT_MS);
-			do_gettimeofday(&t_e);
+			mtk_compat_do_gettimeofday(&t_e);
 			ret = 1;
 			break;
 		case VPU_IPIMSG_DEC_CLOCK_ON:

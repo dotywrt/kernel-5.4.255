@@ -5,6 +5,7 @@
  */
 
 #include "mtk_battery.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define CAR_MIN_GAP 15
 
@@ -24,7 +25,7 @@ void set_fg_time(struct mtk_battery *gm, int _time)
 	struct timespec time, time_now, end_time;
 	ktime_t ktime;
 
-	get_monotonic_boottime(&time_now);
+	mtk_compat_get_monotonic_boottime(&time_now);
 	time.tv_sec = _time;
 	time.tv_nsec = 0;
 	end_time = timespec_add(time_now, time);

@@ -8,6 +8,7 @@
 #include "inc/mag.h"
 #include "sensor_performance.h"
 #include <linux/vmalloc.h>
+#include <linux/mtk_compat_4_19.h>
 
 struct mag_context *mag_context_obj /* = NULL*/;
 static struct mag_init_info *msensor_init_list[MAX_CHOOSE_G_NUM] = {0};
@@ -62,7 +63,7 @@ static void mag_work_func(struct work_struct *work)
 	delay_ms = atomic_read(&cxt->delay);
 	memset(&sensor_data, 0, sizeof(sensor_data));
 	time.tv_sec = time.tv_nsec = 0;
-	get_monotonic_boottime(&time);
+	mtk_compat_get_monotonic_boottime(&time);
 	cur_ns = time.tv_sec * 1000000000LL + time.tv_nsec;
 
 	err = cxt->mag_dev_data.get_data(&x, &y, &z, &status);

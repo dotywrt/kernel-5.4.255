@@ -40,6 +40,7 @@
 #include <disp_drv_platform.h>
 #include <ddp_drv.h>
 #include <ddp_pwm.h>
+#include <linux/mtk_compat_4_19.h>
 
 #define PWM_DEFAULT_DIV_VALUE 0x0
 
@@ -443,7 +444,7 @@ static void disp_pwm_log(int level_1024, int log_type)
 	char buffer[LOGBUFFERSIZE] = "";
 	int print_log;
 
-	do_gettimeofday(&pwm_time);
+	mtk_compat_do_gettimeofday(&pwm_time);
 
 	spin_lock(&g_pwm_log_lock);
 

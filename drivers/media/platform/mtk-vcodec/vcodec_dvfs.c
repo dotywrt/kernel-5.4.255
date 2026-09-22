@@ -12,6 +12,7 @@
 #endif
 #include <linux/slab.h>
 #include "vcodec_dvfs.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define MAX_SUBMIT (33*1000)
 #define SHOW_ALGO_INFO 0
@@ -44,7 +45,7 @@ long long get_time_us(void)
 {
 	struct timeval tv;
 
-	do_gettimeofday(&tv);
+	mtk_compat_do_gettimeofday(&tv);
 	return (1000000LL * tv.tv_sec + tv.tv_usec);
 }
 

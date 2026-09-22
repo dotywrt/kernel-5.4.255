@@ -33,6 +33,7 @@
 #endif
 #if IS_ENABLED(CONFIG_MMPROFILE)
 #include "cmdq_mmp.h"
+#include <linux/mtk_compat_4_19.h>
 #endif
 
 #define CMDQ_GET_COOKIE_CNT(thread) \
@@ -1463,7 +1464,7 @@ void cmdq_core_turnon_first_dump(const struct cmdqRecStruct *task)
 	snprintf(cmdq_first_err.callerName, TASK_COMM_LEN, "%s",
 		task->caller_name);
 	cmdq_first_err.savetime = sched_clock();
-	do_gettimeofday(&cmdq_first_err.savetv);
+	mtk_compat_do_gettimeofday(&cmdq_first_err.savetv);
 }
 EXPORT_SYMBOL(cmdq_core_turnon_first_dump);
 
@@ -2639,7 +2640,7 @@ void cmdq_core_turnon_first_dump_by_handle(
 	snprintf(cmdq_first_err.callerName, TASK_COMM_LEN, "%s",
 		handle->caller_name);
 	cmdq_first_err.savetime = sched_clock();
-	do_gettimeofday(&cmdq_first_err.savetv);
+	mtk_compat_do_gettimeofday(&cmdq_first_err.savetv);
 }
 EXPORT_SYMBOL(cmdq_core_turnon_first_dump_by_handle);
 

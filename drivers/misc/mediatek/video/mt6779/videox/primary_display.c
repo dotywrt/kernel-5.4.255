@@ -94,6 +94,7 @@
 #include "ddp_info.h"
 #include "mtk_ovl.h"
 #include "ddp_ovl_wcg.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define MMSYS_CLK_LOW (0)
 #define MMSYS_CLK_HIGH (1)
@@ -1302,7 +1303,7 @@ static long get_current_time_us(void)
 {
 	struct timeval t;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	return (t.tv_sec & 0xFFF) * 1000000 + t.tv_usec;
 }
 

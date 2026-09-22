@@ -49,6 +49,7 @@
 #include "disp_session.h"
 #include "ddp_mmp.h"
 #include <linux/trace_events.h>
+#include <linux/mtk_compat_4_19.h>
 
 #if defined(CONFIG_MTK_ENG_BUILD) || !defined(CONFIG_MTK_GMO_RAM_OPTIMIZE)
 unsigned int gCapturePriLayerEnable;
@@ -177,7 +178,7 @@ static unsigned long long get_current_time_us(void)
 	/* return do_div(time,1000); */
 	return time;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	return (t.tv_sec & 0xFFF) * 1000000 + t.tv_usec;
 }
 

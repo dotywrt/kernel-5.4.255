@@ -15,6 +15,7 @@
 #include <net/sock.h>		/* netlink */
 #include "mtk_battery_daemon.h"
 #include "mtk_battery.h"
+#include <linux/mtk_compat_4_19.h>
 
 static struct sock *mtk_battery_sk;
 static u_int g_fgd_pid;
@@ -66,7 +67,7 @@ int fg_get_system_sec(void)
 
 	time.tv_sec = 0;
 	time.tv_nsec = 0;
-	get_monotonic_boottime(&time);
+	mtk_compat_get_monotonic_boottime(&time);
 	return (int)time.tv_sec;
 }
 
@@ -574,7 +575,7 @@ static void mtk_battery_daemon_handler(void *nl_data,
 		memcpy(&secs, &msg->fgd_data[0], sizeof(secs));
 
 		if (secs != 0 && secs > 0) {
-			get_monotonic_boottime(&time_now);
+			mtk_compat_get_monotonic_boottime(&time_now);
 			time.tv_sec = secs;
 			time.tv_nsec = 0;
 
@@ -1186,7 +1187,7 @@ static void mtk_battery_daemon_handler(void *nl_data,
 
 		/* when UISOC changes, check the diff time for smooth */
 		if (old_uisoc != gm->ui_soc) {
-			get_monotonic_boottime(&now_time);
+			mtk_compat_get_monotonic_boottime(&now_time);
 			diff = timespec_sub(now_time, gm->uisoc_oldtime);
 
 			bm_err("[K]FG_DAEMON_CMD_SET_KERNEL_UISOC = %d %d GM3:%d old:%d diff=%ld\n",
@@ -2059,7 +2060,7 @@ static int nafg_irq_handler(struct mtk_battery *gm)
 
 	/* 3. Notify fg daemon */
 	wakeup_fg_algo(gm, FG_INTR_NAG_C_DLTV);
-	get_monotonic_boottime(&gm->last_nafg_update_time);
+	mtk_compat_get_monotonic_boottime(&gm->last_nafg_update_time);
 	return 0;
 }
 
@@ -2274,7 +2275,7 @@ static void sw_iavg_init(struct mtk_battery *gm)
 {
 	int bat_current = 0;
 
-	get_monotonic_boottime(&gm->sw_iavg_time);
+	mtk_compat_get_monotonic_boottime(&gm->sw_iavg_time);
 	gm->sw_iavg_car = gauge_get_int_property(GAUGE_PROP_COULOMB);
 
 	/* BAT_DISCHARGING = 0 */
@@ -2295,7 +2296,7 @@ void fg_update_sw_iavg(struct mtk_battery *gm)
 	int fg_coulomb;
 	int version;
 
-	get_monotonic_boottime(&now_time);
+	mtk_compat_get_monotonic_boottime(&now_time);
 
 	diff = timespec_sub(now_time, gm->sw_iavg_time);
 	bm_debug("[%s]diff time:%ld\n",
@@ -2441,7 +2442,7 @@ static int mtk_battery_resume(struct mtk_battery *gm)
 			enable_gauge_irq(gm->gauge, FG_IAVG_L_IRQ);
 	}
 	/* reset nafg monitor time to avoid suspend for too long case */
-	get_monotonic_boottime(&gm->last_nafg_update_time);
+	mtk_compat_get_monotonic_boottime(&gm->last_nafg_update_time);
 
 	fg_update_sw_iavg(gm);
 

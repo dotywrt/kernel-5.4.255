@@ -22,6 +22,7 @@
 #endif
 #ifdef CONFIG_MTK_DEVAPC
 #include <linux/soc/mediatek/devapc_public.h>
+#include <linux/mtk_compat_4_19.h>
 #endif
 
 #define CMDQ_MBOX_NUM			2
@@ -117,7 +118,7 @@ void cmdq_util_error_enable(void)
 {
 	if (!util.err.nsec) {
 		util.err.nsec = sched_clock();
-		do_gettimeofday(&util.err.errtm);
+		mtk_compat_do_gettimeofday(&util.err.errtm);
 	}
 	util.err.enable = true;
 }

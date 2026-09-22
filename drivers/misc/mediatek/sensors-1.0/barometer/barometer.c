@@ -6,6 +6,7 @@
 #define pr_fmt(fmt) "Barometer " fmt
 
 #include "inc/barometer.h"
+#include <linux/mtk_compat_4_19.h>
 
 struct baro_context *baro_context_obj /* = NULL*/;
 
@@ -78,7 +79,7 @@ static void baro_work_func(struct work_struct *work)
 	}
 
 	time.tv_sec = time.tv_nsec = 0;
-	get_monotonic_boottime(&time);
+	mtk_compat_get_monotonic_boottime(&time);
 	cur_ns = time.tv_sec * 1000000000LL + time.tv_nsec;
 
 	/* add wake lock to make sure data can be read before system suspend */

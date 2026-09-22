@@ -59,6 +59,7 @@
 #include <ddp_aal.h>
 #include <ddp_pwm.h>
 #include <ddp_color.h>
+#include <linux/mtk_compat_4_19.h>
 
 #if defined(CONFIG_MACH_MT6799)
 /* #include "mt-plat/mtk_chip.h" */
@@ -1290,7 +1291,7 @@ static void disp_aal_notify_backlight_log(int bl_1024)
 	unsigned long tsec;
 	unsigned long tusec;
 
-	do_gettimeofday(&aal_time);
+	mtk_compat_do_gettimeofday(&aal_time);
 	tsec = (unsigned long)aal_time.tv_sec % 100;
 	tusec = (unsigned long)aal_time.tv_usec / 1000;
 

@@ -29,6 +29,7 @@
 #include "private/tmem_utils.h"
 #include "private/ut_cmd.h"
 #include "tests/ut_api.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define KERN_UT_RUN_ALL_STOP_ONCE_FAILED (1)
 
@@ -113,12 +114,12 @@ static void ut_status_reset(u64 ut_cmd)
 	ut_case_fail_count = 0;
 	ut_case_halt = false;
 	ut_case_command = ut_cmd;
-	do_gettimeofday(&ut_case_start_time);
+	mtk_compat_do_gettimeofday(&ut_case_start_time);
 }
 
 static void ut_status_dump(void)
 {
-	do_gettimeofday(&ut_case_end_time);
+	mtk_compat_do_gettimeofday(&ut_case_end_time);
 	pr_info("[UT_CASE]================================================\n");
 	pr_info("[UT_CASE]Executing UT command: %lld\n", ut_case_command);
 	pr_info("[UT_CASE]  TOTAL TEST ITEMS: %d\n",

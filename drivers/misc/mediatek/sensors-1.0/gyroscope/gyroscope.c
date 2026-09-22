@@ -8,6 +8,7 @@
 #include "inc/gyroscope.h"
 #include "sensor_performance.h"
 #include <linux/vmalloc.h>
+#include <linux/mtk_compat_4_19.h>
 
 struct gyro_context *gyro_context_obj /* = NULL*/;
 static struct platform_device *pltfm_dev;
@@ -20,7 +21,7 @@ static int64_t getCurNS(void)
 	struct timespec time;
 
 	time.tv_sec = time.tv_nsec = 0;
-	get_monotonic_boottime(&time);
+	mtk_compat_get_monotonic_boottime(&time);
 	ns = time.tv_sec * 1000000000LL + time.tv_nsec;
 
 	return ns;

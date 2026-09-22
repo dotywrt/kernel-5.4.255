@@ -14,6 +14,7 @@
 #include <linux/slab.h>
 #include "disp_drv_log.h"
 #include "disp_utils.h"
+#include <linux/mtk_compat_4_19.h>
 
 int disp_sw_mutex_lock(struct mutex *m)
 {
@@ -45,6 +46,6 @@ long disp_get_time_us(void)
 {
 	struct timeval t;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	return (t.tv_sec & 0xFFF) * 1000000 + t.tv_usec;
 }

@@ -22,6 +22,7 @@
 #include "mtk_sd.h"
 #include "autok_cust.h"
 #include "mmc/core/card.h"
+#include <linux/mtk_compat_4_19.h>
 
 /* 100ms */
 #define AUTOK_CMD_TIMEOUT            (HZ / 10)
@@ -6198,7 +6199,7 @@ int autok_sdio30_plus_tuning(struct msdc_host *host, u8 *res)
 	unsigned int dvfs_hw = 0;
 	unsigned int dtoc = 0;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
@@ -6243,7 +6244,7 @@ int autok_sdio30_plus_tuning(struct msdc_host *host, u8 *res)
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_DVFS_HW, dvfs_hw);
 	MSDC_SET_FIELD(SDC_CFG, SDC_CFG_DTOC, dtoc);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK]======Cost:%d ms======\r\n", tm_val);
@@ -6267,7 +6268,7 @@ int autok_execute_tuning(struct msdc_host *host, u8 *res)
 	unsigned int dvfs_hw = 0;
 	unsigned int dtoc = 0;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
@@ -6309,7 +6310,7 @@ int autok_execute_tuning(struct msdc_host *host, u8 *res)
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_DVFS_HW, dvfs_hw);
 	MSDC_SET_FIELD(SDC_CFG, SDC_CFG_DTOC, dtoc);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK]======Cost:%d ms======\r\n", tm_val);
@@ -6330,7 +6331,7 @@ int hs400_execute_tuning(struct msdc_host *host, u8 *res)
 	unsigned int i = 0;
 	unsigned int value = 0;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
 	MSDC_GET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
@@ -6362,7 +6363,7 @@ int hs400_execute_tuning(struct msdc_host *host, u8 *res)
 	MSDC_WRITE32(MSDC_INTEN, int_en);
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK][HS400]======Cost:%d ms======\r\n", tm_val);
@@ -6380,7 +6381,7 @@ int hs400_execute_tuning_cmd(struct msdc_host *host, u8 *res)
 	unsigned int int_en = 0;
 	void __iomem *base = host->base;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
 	MSDC_GET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
@@ -6394,7 +6395,7 @@ int hs400_execute_tuning_cmd(struct msdc_host *host, u8 *res)
 	MSDC_WRITE32(MSDC_INTEN, int_en);
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK][HS400 cmd]======Cost:%d ms======\r\n", tm_val);
@@ -6420,7 +6421,7 @@ int hs200_execute_tuning(struct msdc_host *host, u8 *res)
 
 	memset(&platform_para_func, 0, sizeof(struct AUTOK_PLAT_FUNC));
 	get_platform_func(platform_para_func);
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
 	MSDC_GET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
@@ -6464,7 +6465,7 @@ int hs200_execute_tuning(struct msdc_host *host, u8 *res)
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
 	MSDC_SET_FIELD(SDC_CFG, SDC_CFG_DTOC, dtoc);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK][HS200]======Cost:%d ms======\r\n", tm_val);
@@ -6482,7 +6483,7 @@ int hs200_execute_tuning_cmd(struct msdc_host *host, u8 *res)
 	unsigned int int_en = 0;
 	void __iomem *base = host->base;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 	int_en = MSDC_READ32(MSDC_INTEN);
 	MSDC_WRITE32(MSDC_INTEN, 0);
 	MSDC_GET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
@@ -6496,7 +6497,7 @@ int hs200_execute_tuning_cmd(struct msdc_host *host, u8 *res)
 	MSDC_WRITE32(MSDC_INTEN, int_en);
 	MSDC_SET_FIELD(MSDC_CFG, MSDC_CFG_CKPDN, clk_pwdn);
 
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK][HS200 cmd]======Cost:%d ms======\r\n", tm_val);
@@ -6525,7 +6526,7 @@ int autok_vcore_merge_sel(struct msdc_host *host, unsigned int merge_cap)
 	unsigned int data_dly = 0;
 	unsigned int clk_mode = 0;
 
-	do_gettimeofday(&tm_s);
+	mtk_compat_do_gettimeofday(&tm_s);
 	if (host->dev_comp->clk_div_bits == 8)
 		MSDC_GET_FIELD(MSDC_CFG, MSDC_CFG_CKMOD, clk_mode);
 	else
@@ -6795,7 +6796,7 @@ host_data_tx_merge:
 	AUTOK_DBGPRINT(AUTOK_DBG_RES, "[AUTOK]dat tx = %d\r\n", data_dly);
 
 end:
-	do_gettimeofday(&tm_e);
+	mtk_compat_do_gettimeofday(&tm_e);
 	tm_val = (tm_e.tv_sec - tm_s.tv_sec) * 1000
 		+ (tm_e.tv_usec - tm_s.tv_usec) / 1000;
 	AUTOK_RAWPRINT("[AUTOK][merge]======Time Cost:%d ms======\r\n", tm_val);

@@ -13,6 +13,7 @@
 
 #include "main.h"
 #include "comms.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define READ_ACK_TIMEOUT_MS	10
 #define READ_MSG_TIMEOUT_MS	70
@@ -316,7 +317,7 @@ int nanohub_comms_rx_retrans_boottime(struct nanohub_data *data, u32 cmd,
 
 	do {
 		data->comms.open(data);
-		get_monotonic_boottime(&ts);
+		mtk_compat_get_monotonic_boottime(&ts);
 		boottime = timespec_to_ns(&ts);
 		packet_size =
 		    packet_create(&pad->packet, seq, cmd, sizeof(boottime),

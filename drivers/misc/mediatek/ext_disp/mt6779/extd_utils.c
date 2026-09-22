@@ -11,6 +11,7 @@
 
 #include "extd_utils.h"
 #include "extd_log.h"
+#include <linux/mtk_compat_4_19.h>
 
 static DEFINE_SEMAPHORE(extd_mutex);
 
@@ -60,7 +61,7 @@ long extd_get_time_us(void)
 {
 	struct timeval t;
 
-	do_gettimeofday(&t);
+	mtk_compat_do_gettimeofday(&t);
 	return (t.tv_sec & 0xFFF) * 1000000 + t.tv_usec;
 }
 

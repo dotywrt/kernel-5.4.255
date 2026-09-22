@@ -28,6 +28,7 @@
 #include <net/sock.h>		/* netlink */
 #include "mtk_battery.h"
 #include "mtk_battery_table.h"
+#include <linux/mtk_compat_4_19.h>
 
 void __attribute__ ((weak))
 	mtk_battery_daemon_init(struct platform_device *pdev)
@@ -499,9 +500,9 @@ int force_get_tbat_internal(struct mtk_battery *gm, bool update)
 			pre_fg_current_state = fg_current_state;
 			pre_fg_r_value = fg_r_value;
 			pre_bat_temperature_val2 = bat_temperature_val;
-			get_monotonic_boottime(&pre_time);
+			mtk_compat_get_monotonic_boottime(&pre_time);
 		} else {
-			get_monotonic_boottime(&ctime);
+			mtk_compat_get_monotonic_boottime(&ctime);
 			dtime = timespec_sub(ctime, pre_time);
 
 			if (((dtime.tv_sec <= 20) &&
@@ -1859,7 +1860,7 @@ static int uisoc_set(struct mtk_battery *gm,
 
 	/* when UISOC changes, check the diff time for smooth */
 	if (old_uisoc != gm->ui_soc) {
-		get_monotonic_boottime(&now_time);
+		mtk_compat_get_monotonic_boottime(&now_time);
 		diff = timespec_sub(now_time, gm->uisoc_oldtime);
 
 		bm_debug("[%s] FG_DAEMON_CMD_SET_KERNEL_UISOC = %d %d GM3:%d old:%d diff=%ld\n",
@@ -1941,7 +1942,7 @@ static int reset_set(struct mtk_battery *gm,
 	gauge_coulomb_before_reset(gm);
 	gauge_set_property(GAUGE_PROP_RESET, 0);
 	gauge_coulomb_after_reset(gm);
-	get_monotonic_boottime(&gm->sw_iavg_time);
+	mtk_compat_get_monotonic_boottime(&gm->sw_iavg_time);
 	gm->sw_iavg_car = gauge_get_int_property(GAUGE_PROP_COULOMB);
 	gm->bat_cycle_car = 0;
 
@@ -2370,7 +2371,7 @@ int set_shutdown_cond(struct mtk_battery *gm, int shutdown_cond)
 				if (now_is_charging != 1) {
 					sds->is_soc_zero_percent =
 						true;
-					get_monotonic_boottime(
+					mtk_compat_get_monotonic_boottime(
 						&sdc->pre_time[
 						SOC_ZERO_PERCENT]);
 					bm_debug("[%s]soc_zero_percent shutdown\n",
@@ -2388,7 +2389,7 @@ int set_shutdown_cond(struct mtk_battery *gm, int shutdown_cond)
 				if (now_is_charging != 1) {
 					sds->is_uisoc_one_percent =
 						true;
-					get_monotonic_boottime(
+					mtk_compat_get_monotonic_boottime(
 					&sdc->pre_time[UISOC_ONE_PERCENT]);
 					bm_debug("[%s]uisoc 1 percent shutdown\n",
 						__func__);
@@ -2421,7 +2422,7 @@ int set_shutdown_cond(struct mtk_battery *gm, int shutdown_cond)
 		if (sdc->shutdown_status.is_dlpt_shutdown != true) {
 			mutex_lock(&sdc->lock);
 			sdc->shutdown_status.is_dlpt_shutdown = true;
-			get_monotonic_boottime(&sdc->pre_time[DLPT_SHUTDOWN]);
+			mtk_compat_get_monotonic_boottime(&sdc->pre_time[DLPT_SHUTDOWN]);
 			wakeup_fg_algo(gm, FG_INTR_DLPT_SD);
 			mutex_unlock(&sdc->lock);
 		}
@@ -2462,7 +2463,7 @@ static int shutdown_event_handler(struct mtk_battery *gm)
 	duraction.tv_sec = 0;
 	duraction.tv_nsec = 0;
 
-	get_monotonic_boottime(&now);
+	mtk_compat_get_monotonic_boottime(&now);
 
 	bm_debug("%s:soc_zero:%d,ui 1percent:%d,dlpt_shut:%d,under_shutdown_volt:%d\n",
 		__func__,
@@ -2576,7 +2577,7 @@ static int shutdown_event_handler(struct mtk_battery *gm)
 			}
 
 			if ((current_ui_soc == 0) && (ui_zero_time_flag == 0)) {
-				get_monotonic_boottime(
+				mtk_compat_get_monotonic_boottime(
 					&sdd->pre_time[LOW_BAT_VOLT]);
 				ui_zero_time_flag = 1;
 			}
@@ -2646,7 +2647,7 @@ static void power_misc_handler(void *arg)
 
 	secs = shutdown_event_handler(gm);
 	if (secs != 0 && gm->disableGM30 == false) {
-		get_monotonic_boottime(&time_now);
+		mtk_compat_get_monotonic_boottime(&time_now);
 		time.tv_sec = secs;
 		time.tv_nsec = 0;
 		end_time = timespec_add(time_now, time);

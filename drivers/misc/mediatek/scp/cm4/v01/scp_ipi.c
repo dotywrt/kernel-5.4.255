@@ -8,6 +8,7 @@
 #include "scp_ipi.h"
 #include "scp_helper.h"
 #include "scp_excep.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define PRINT_THRESHOLD 10000
 enum ipi_id scp_ipi_id_record;
@@ -51,7 +52,7 @@ void scp_A_ipi_handler(void)
 					scp_ipi_desc[scp_id].recv_count;
 			scp_ipi_desc[scp_id].handler_timestamp[flag] = 0;
 			scp_ipi_desc[scp_id].recv_timestamp[flag] =
-					arch_counter_get_cntvct();
+					mtk_compat_arch_counter_get_cntvct();
 		}
 #endif
 		scp_ipi_desc[scp_id].handler(scp_id, scp_recv_buff[SCP_A_ID],
@@ -59,7 +60,7 @@ void scp_A_ipi_handler(void)
 #if SCP_IPI_STAMP_SUPPORT
 		if (flag < SCP_IPI_ID_STAMP_SIZE)
 			scp_ipi_desc[scp_id].handler_timestamp[flag] =
-					arch_counter_get_cntvct();
+					mtk_compat_arch_counter_get_cntvct();
 #endif
 		/* After SCP IPI handler,
 		 * send a awake ipi to avoid
@@ -279,7 +280,7 @@ enum scp_ipi_status scp_ipi_send(enum ipi_id id, void *buf,
 		scp_ipi_desc[id].send_flag[flag] =
 				scp_ipi_desc[id].success_count;
 		scp_ipi_desc[id].send_timestamp[flag] =
-				arch_counter_get_cntvct();
+				mtk_compat_arch_counter_get_cntvct();
 	}
 #endif
 	/* toggle the related bit to trigger an interrupt to scp */

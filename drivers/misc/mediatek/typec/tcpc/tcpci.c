@@ -6,6 +6,7 @@
 #include "inc/tcpci.h"
 #include <linux/time.h>
 #include <linux/slab.h>
+#include <linux/mtk_compat_4_19.h>
 
 #define TCPC_NOTIFY_OVERTIME	(20) /* ms */
 
@@ -30,9 +31,9 @@ static void tcp_notify_func(struct work_struct *work)
 	struct timeval begin, end;
 	int timeval = 0;
 
-	do_gettimeofday(&begin);
+	mtk_compat_do_gettimeofday(&begin);
 	srcu_notifier_call_chain(&tcpc->evt_nh[type], state, tcp_noti);
-	do_gettimeofday(&end);
+	mtk_compat_do_gettimeofday(&end);
 	timeval = (timeval_to_ns(end) - timeval_to_ns(begin))/1000/1000;
 	PD_BUG_ON(timeval > TCPC_NOTIFY_OVERTIME);
 #else
@@ -68,9 +69,9 @@ static int tcpc_check_notify_time(struct tcpc_device *tcpc,
 	struct timeval begin, end;
 	int timeval = 0;
 
-	do_gettimeofday(&begin);
+	mtk_compat_do_gettimeofday(&begin);
 	ret = srcu_notifier_call_chain(&tcpc->evt_nh[type], state, tcp_noti);
-	do_gettimeofday(&end);
+	mtk_compat_do_gettimeofday(&end);
 	timeval = (timeval_to_ns(end) - timeval_to_ns(begin))/1000/1000;
 	PD_BUG_ON(timeval > TCPC_NOTIFY_OVERTIME);
 #else

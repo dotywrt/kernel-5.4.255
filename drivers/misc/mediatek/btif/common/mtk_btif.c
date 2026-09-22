@@ -29,6 +29,7 @@
 #include "btif_dma_pub.h"
 #include "mtk_btif_exp.h"
 #include "mtk_btif.h"
+#include <linux/mtk_compat_4_19.h>
 
 #define DRIVER_ATTR(_name, _mode, _show, _store) \
 	struct driver_attribute driver_attr_##_name = \
@@ -1725,10 +1726,10 @@ int _btif_enter_dpidle_from_on(struct _mtk_btif_ *p_btif)
 	struct timeval timer_start;
 	struct timeval timer_now;
 
-	do_gettimeofday(&timer_start);
+	mtk_compat_do_gettimeofday(&timer_start);
 
 	while ((!_btif_is_tx_complete(p_btif)) && (retry < max_retry)) {
-		do_gettimeofday(&timer_now);
+		mtk_compat_do_gettimeofday(&timer_now);
 		if ((MAX_WAIT_TIME_MS/1000) <=
 				(timer_now.tv_sec - timer_start.tv_sec)) {
 			BTIF_WARN_FUNC("expired start:%ld,now:%ld,retry:%d\n",
@@ -2166,7 +2167,7 @@ static int mtk_btif_rxd_be_blocked_by_timer(void)
 	struct timeval now;
 	int time_gap[MAX_BTIF_RXD_TIME_REC];
 
-	do_gettimeofday(&now);
+	mtk_compat_do_gettimeofday(&now);
 
 	for (i = 0; i < MAX_BTIF_RXD_TIME_REC; i++) {
 		BTIF_INFO_FUNC("btif_rxd_time_stamp[%d]=%ld.%ld\n", i,
@@ -2280,7 +2281,7 @@ static int btif_rx_thread(void *p_data)
 			break;
 		}
 #if BTIF_RXD_BE_BLOCKED_DETECT
-		do_gettimeofday(&btif_rxd_time_stamp[i]);
+		mtk_compat_do_gettimeofday(&btif_rxd_time_stamp[i]);
 		i++;
 		if (i >= MAX_BTIF_RXD_TIME_REC)
 			i = 0;
@@ -2956,7 +2957,7 @@ int btif_log_buf_dmp_in(struct _btif_log_queue_t_ *p_log_que,
 	p_ts = &p_log_buf->ts;
 
 /*log time stamp*/
-	do_gettimeofday(p_timer);
+	mtk_compat_do_gettimeofday(p_timer);
 	*p_ts = ktime_to_timespec(ktime_get());
 
 /*record data information including length and content*/

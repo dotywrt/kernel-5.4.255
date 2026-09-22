@@ -22,6 +22,7 @@
 #include "ccci_util_log.h"
 #include "ccci_comm_config.h"
 #include "ccci_debug.h"
+#include <linux/mtk_compat_4_19.h>
 
 /******************************************************************************/
 /* Ring buffer part, this type log is block read, used for temp debug purpose */
@@ -1046,7 +1047,7 @@ int ext_ccci_event_log(const char *fmt, ...)
 	preempt_enable();
 
 	/* prepare andorid time info */
-	do_gettimeofday(&tv);
+	mtk_compat_do_gettimeofday(&tv);
 	tv_android = tv;
 	rtc_time_to_tm(tv.tv_sec, &tm);
 	tv_android.tv_sec -= sys_tz.tz_minuteswest * 60;
