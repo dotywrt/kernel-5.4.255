@@ -42,6 +42,11 @@
 
 #include <linux/string.h>
 
+/* DOTY MT6890: legacy Trusty ARM64 inline-asm compatibility. */
+#ifndef __asmeq
+#define __asmeq(x, y) ".ifnc " x "," y " ; .err ; .endif\n\t"
+#endif
+
 /* #define TRUSTY_SMC_DEBUG */
 
 #ifdef TRUSTY_SMC_DEBUG
