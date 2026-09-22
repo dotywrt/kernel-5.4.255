@@ -137,7 +137,7 @@ int met_smp_call_function_single(
 
 u64 met_arch_counter_get_cntvct(void)
 {
-	return arch_counter_get_cntvct();
+	return met_arch_counter_get_cntvct();
 }
 
 void met_arch_send_call_function_single_ipi(int cpu)
