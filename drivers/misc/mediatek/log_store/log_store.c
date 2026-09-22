@@ -77,7 +77,7 @@ int set_emmc_config(int type, int value)
 	}
 
 	fs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 
 	fd = ksys_open(EXPDB_PATH, O_RDWR, 0);
 	if (fd < 0) {
@@ -117,7 +117,7 @@ int read_emmc_config(struct log_emmc_header *log_header)
 	int file_size;
 
 	fs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 
 	fd = ksys_open(EXPDB_PATH, O_RDWR, 0);
 	if (fd < 0) {

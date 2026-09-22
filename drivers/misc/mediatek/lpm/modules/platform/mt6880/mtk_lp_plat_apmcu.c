@@ -18,6 +18,18 @@
 #include <mtk_lp_plat_reg.h>
 #include <mtk_lp_plat_apmcu.h>
 #include <mtk_lp_plat_apmcu_mbox.h>
+#include <linux/timekeeping.h>
+
+/* DOTY Linux-5.4 compatibility for legacy CLOCK_BOOTTIME timespec users. */
+static inline void doty_get_monotonic_boottime_compat(struct timespec *ts)
+{
+	struct timespec64 ts64;
+
+	ktime_get_boottime_ts64(&ts64);
+	ts->tv_sec = ts64.tv_sec;
+	ts->tv_nsec = ts64.tv_nsec;
+}
+
 
 void __iomem *cpu_pm_mcusys_base;
 void __iomem *cpu_pm_syssram_base;
@@ -233,7 +245,7 @@ static int mtk_lp_plat_wait_depd_condition(void *arg)
 			mcupm_rdy = true;
 
 		if (!boot_time_pass) {
-			get_monotonic_boottime(&uptime);
+			doty_get_monotonic_boottime_compat(&uptime);
 
 			if ((unsigned int)uptime.tv_sec > BOOT_TIME_LIMIT)
 				boot_time_pass = true;
