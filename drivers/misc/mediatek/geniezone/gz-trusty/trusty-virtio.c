@@ -725,7 +725,7 @@ static int bind_big_core(struct cpumask *mask)
 		return -1;
 
 	for_each_child_of_node(cpus, cpu) {
-		if (of_node_cmp(cpu->type, "cpu"))
+		if (of_node_cmp(of_node_get_device_type(cpu), "cpu"))
 			continue;
 
 		cpu_num++;
