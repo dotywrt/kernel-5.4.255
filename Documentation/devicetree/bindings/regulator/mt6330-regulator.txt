@@ -1,0 +1,54 @@
+Mediatek MT6330 Regulator
+
+Required properties:
+- compatible: "mediatek,mt6330-regulator"
+- mt6330regulator: List of regulators provided by this controller. It is named
+  according to its regulator type, buck_<name> and ldo_<name>.
+  The definition for each of these nodes is defined using the standard binding
+  for regulators at Documentation/devicetree/bindings/regulator/regulator.txt.
+
+The valid names for regulators are::
+BUCK:
+  buck_vs1, buck_vmd12, buck_vrfdig, buck_vcore, buck_vs2, buck_vmd11,
+  buck_vsram_md, buck_vs3
+LDO:
+  ldo_vusb, ldo_vcn18, ldo_vaux18, ldo_vrf09, ldo_vbbck, ldo_va12_1,
+  ldo_vrfck, ldo_vsim1, ldo_vio18_2, ldo_vmdd2, ldo_vrf13, ldo_vxo22,
+  ldo_vefuse, ldo_vio18_1, ldo_va12_2, ldo_vemc, ldo_vmddr, ldo_vrf18,
+  ldo_vmddq, ldo_vmc, ldo_vsim2, ldo_vsram_proc, ldo_vsram_core,
+  ldo_vsram_rfdig
+
+Example:
+	pmic {
+		compatible = "mediatek,mt6330";
+
+		mt6330regulator: mt6330regulator {
+			compatible = "mediatek,mt6330-regulator";
+
+			mt6330_vs1_buck_reg: buck_vs1 {
+				regulator-name = "vs1";
+				regulator-min-microvolt = <800000>;
+				regulator-max-microvolt = <2200000>;
+				regulator-enable-ramp-delay = <200>;
+				regulator-always-on;
+			};
+			mt6330_vmd12_buck_reg: buck_vmd12 {
+				regulator-name = "vmd12";
+				regulator-min-microvolt = <400000>;
+				regulator-max-microvolt = <1193000>;
+				regulator-enable-ramp-delay = <200>;
+			};
+			mt6330_vrfdig_buck_reg: buck_vrfdig {
+				regulator-name = "vrfdig";
+				regulator-min-microvolt = <400000>;
+				regulator-max-microvolt = <1193000>;
+				regulator-enable-ramp-delay = <200>;
+			};
+			mt6330_vcore_buck_reg: buck_vcore {
+				regulator-name = "vcore";
+				regulator-min-microvolt = <400000>;
+				regulator-max-microvolt = <1193000>;
+				regulator-enable-ramp-delay = <200>;
+				regulator-always-on;
+			};
+	};

@@ -1,0 +1,24 @@
+/*
+ * MediaTek CCCI compatibility for Linux 5.4.
+ *
+ * Keep vendor CCCI sources using do_gettimeofday() unchanged while mapping
+ * the removed API to the Linux 5.4 time64 implementation.
+ */
+#ifndef __MTK_CCCI_TIME_COMPAT_H
+#define __MTK_CCCI_TIME_COMPAT_H
+
+#include <linux/time.h>
+#include <linux/timekeeping.h>
+
+static inline void mtk_ccci_do_gettimeofday(struct timeval *tv)
+{
+	struct timespec64 ts;
+
+	ktime_get_real_ts64(&ts);
+	tv->tv_sec = ts.tv_sec;
+	tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
+}
+
+#define do_gettimeofday(_tv) mtk_ccci_do_gettimeofday((_tv))
+
+#endif /* __MTK_CCCI_TIME_COMPAT_H */
