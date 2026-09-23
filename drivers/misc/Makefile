@@ -74,16 +74,12 @@ obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
 
 
 # MT6890 Linux 5.4 provider wiring (ported from vendor layout)
-obj-$(CONFIG_MTK_AEE_FEATURE) += mediatek/aee/
 
 # MT6890 Linux 5.4 provider wiring (ported from vendor layout)
-obj-$(CONFIG_MTK_CONN_MD) += mediatek/conn_md/
 
 # MT6890 Linux 5.4 provider wiring (ported from vendor layout)
-obj-$(CONFIG_MTK_PMIC_NEW_ARCH) += mediatek/pmic/
 
 # MT6890 Linux 5.4: required by AEE MRDUMP
-obj-y += mediatek/dbgtop/
 
 
 
@@ -91,8 +87,10 @@ obj-y += mediatek/dbgtop/
 obj-y += fg360_slic_irq.o
 
 # DOTY MT6890 Stage-2C-A6 localized MCUPM provider
-obj-$(CONFIG_MTK_TINYSYS_MCUPM_SUPPORT) += mediatek/mcupm/
 
+
+
+# DOTY MT6890 parent Kbuild closure v10: drivers/misc -> MediaTek vendor subtree
 
 # BEGIN MT6890 REQUIRED PROVIDERS
 # Build only the MediaTek Linux 5.4 providers required by the localized
@@ -103,8 +101,4 @@ obj-$(CONFIG_MTK_ECCCI_DRIVER)		+= mediatek/eccci/
 obj-$(CONFIG_MTK_COMBO)			+= mediatek/connectivity/
 obj-$(CONFIG_MTK_CLK_BUFFER)		+= mediatek/clkbuf/
 obj-$(CONFIG_MTK_TINYSYS_MEDMCU_SUPPORT)	+= mediatek/medmcu/
-obj-$(CONFIG_MTK_IOMMU_MISC)		+= mediatek/iommu/
 # END MT6890 REQUIRED PROVIDERS
-
-# DOTY MT6890 parent Kbuild closure v10: drivers/misc -> MediaTek vendor subtree
-obj-y += mediatek/
