@@ -92,6 +92,10 @@ obj-y += fg360_slic_irq.o
 
 # DOTY MT6890 parent Kbuild closure v10: drivers/misc -> MediaTek vendor subtree
 
+
+
+
+
 # BEGIN MT6890 REQUIRED PROVIDERS
 # Build only the MediaTek Linux 5.4 providers required by the localized
 # MT6890 external modules. Do not enter the complete mediatek/ Makefile.
