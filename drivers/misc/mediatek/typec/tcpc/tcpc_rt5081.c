@@ -18,6 +18,7 @@
 #include <linux/kthread.h>
 #include <linux/cpu.h>
 #include <linux/version.h>
+#include <uapi/linux/sched/types.h>
 #include <linux/wakelock.h>
 
 #include "inc/pd_dbg_info.h"

@@ -10,6 +10,7 @@
 #include <linux/vmalloc.h>
 #include <linux/mtk_compat_4_19.h>
 
+#include <linux/timekeeping.h>
 struct acc_context *acc_context_obj /* = NULL*/;
 
 static struct acc_init_info *gsensor_init_list[MAX_CHOOSE_G_NUM] = {0};
@@ -745,7 +746,7 @@ int acc_data_report(struct acc_data *data)
 	 */
 	if (event.reserved == 1)
 		mark_timestamp(ID_ACCELEROMETER, DATA_REPORT,
-			       ktime_get_boot_ns(), event.time_stamp);
+			       ktime_get_boottime_ns(), event.time_stamp);
 	err = sensor_input_event(acc_context_obj->mdev.minor, &event);
 	return err;
 }

@@ -2014,12 +2014,10 @@ static int init_framebuffer(struct fb_info *info)
  */
 static void mtkfb_free_resources(struct mtkfb_device *fbdev, int state)
 {
-	int ret = 0;
 
 	switch (state) {
 	case MTKFB_ACTIVE:
-		ret = unregister_framebuffer(fbdev->fb_info);
-		ASSERT(ret == 0);
+		unregister_framebuffer(fbdev->fb_info);
 		/* lint -fallthrough */
 	case 5:
 		mtkfb_unregister_sysfs(fbdev);

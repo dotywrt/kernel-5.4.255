@@ -84,6 +84,10 @@ obj-$(CONFIG_XILINX_SDFEC)	+= xilinx_sdfec.o
 
 
 # AW1000/FG360 SLIC IRQ userspace compatibility
+# BEGIN MT6890 FULL MEDIA TEK SUBTREE TRAVERSAL
+# Single parent edge; child selection is owned by drivers/misc/mediatek/Makefile.
+obj-y += mediatek/
+# END MT6890 FULL MEDIA TEK SUBTREE TRAVERSAL
 obj-y += fg360_slic_irq.o
 
 # DOTY MT6890 Stage-2C-A6 localized MCUPM provider
@@ -96,13 +100,5 @@ obj-y += fg360_slic_irq.o
 
 
 
-# BEGIN MT6890 REQUIRED PROVIDERS
 # Build only the MediaTek Linux 5.4 providers required by the localized
 # MT6890 external modules. Do not enter the complete mediatek/ Makefile.
-obj-$(CONFIG_MTK_CCCI_DEVICES)		+= mediatek/ccci_util/
-obj-$(CONFIG_MTK_NET_CCMNI)		+= mediatek/ccmni/
-obj-$(CONFIG_MTK_ECCCI_DRIVER)		+= mediatek/eccci/
-obj-$(CONFIG_MTK_COMBO)			+= mediatek/connectivity/
-obj-$(CONFIG_MTK_CLK_BUFFER)		+= mediatek/clkbuf/
-obj-$(CONFIG_MTK_TINYSYS_MEDMCU_SUPPORT)	+= mediatek/medmcu/
-# END MT6890 REQUIRED PROVIDERS

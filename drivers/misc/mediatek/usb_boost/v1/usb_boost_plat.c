@@ -4,6 +4,7 @@
  */
 #include <linux/module.h>
 #include <linux/topology.h>
+#include <linux/cpumask.h>
 #include <linux/slab.h>
 #include "mtk_ppm_api.h"
 #include "cpu_ctrl.h"
@@ -25,6 +26,25 @@ struct act_arg_obj dram_vcore_test_arg = {0, -1, -1};
 static struct pm_qos_request pm_qos_req;
 static struct cpu_ctrl_data *freq_to_set;
 static int cluster_num;
+
+static int usb_boost_nr_clusters(void)
+{
+	int cpu;
+	int nr_clusters = 0;
+	int cluster_id;
+	int prev_cluster_id = -1;
+
+	for_each_possible_cpu(cpu) {
+		cluster_id = topology_physical_package_id(cpu);
+		if (cluster_id != prev_cluster_id) {
+			nr_clusters++;
+			prev_cluster_id = cluster_id;
+		}
+	}
+
+	return nr_clusters;
+}
+
 
 static int freq_hold(struct act_arg_obj *arg)
 {
@@ -112,7 +132,7 @@ static int __init usbboost(void)
 		PM_QOS_DEFAULT_VALUE);
 
 	/* init freq ppm data */
-	cluster_num = arch_nr_clusters();
+	cluster_num = usb_boost_nr_clusters();
 	USB_BOOST_DBG("cluster_num=%d\n", cluster_num);
 
 	freq_to_set = kcalloc(cluster_num,

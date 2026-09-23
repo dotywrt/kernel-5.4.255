@@ -472,12 +472,10 @@ static void mtkfb_fbinfo_cleanup(struct mtkfb_device *fbdev)
  */
 static void mtkfb_free_resources(struct mtkfb_device *fbdev, int state)
 {
-	int r = 0;
 
 	switch (state) {
 	case MTKFB_ACTIVE:
-		r = unregister_framebuffer(fbdev->fb_info);
-		WARN_ON(r == 0);
+		unregister_framebuffer(fbdev->fb_info);
 		/* lint -fallthrough */
 	case 4:
 		mtkfb_fbinfo_cleanup(fbdev);

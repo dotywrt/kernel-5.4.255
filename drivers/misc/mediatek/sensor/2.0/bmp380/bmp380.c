@@ -10,6 +10,7 @@
 #include <linux/of.h>
 #include <linux/delay.h>
 
+#include <linux/timekeeping.h>
 #include "hf_manager.h"
 
 #define CHECK_CHIP_ID_TIME_MAX          0x05
@@ -342,7 +343,7 @@ static int bmp380_sample(struct hf_device *hfdev)
 		return err;
 	}
 
-	current_time = ktime_get_boot_ns();
+	current_time = ktime_get_boottime_ns();
 	if (atomic_read(&driver_dev->raw_enable)) {
 		memset(&event, 0, sizeof(struct hf_manager_event));
 		event.timestamp = current_time;
