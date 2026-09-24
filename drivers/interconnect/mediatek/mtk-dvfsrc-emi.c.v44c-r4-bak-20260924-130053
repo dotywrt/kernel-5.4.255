@@ -168,7 +168,7 @@ static const struct of_device_id emi_icc_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, emi_icc_of_match);
 
-static int emi_icc_aggregate(struct icc_node *node, u32 tag, u32 avg_bw,
+static int emi_icc_aggregate(struct icc_node *node, u32 avg_bw,
 			     u32 peak_bw, u32 *agg_avg, u32 *agg_peak)
 {
 	struct mtk_icc_node *in;
