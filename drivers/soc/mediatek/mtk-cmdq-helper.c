@@ -200,7 +200,9 @@ static int cmdq_pkt_finalize(struct cmdq_pkt *pkt)
 	err = cmdq_pkt_append_command(pkt, CMDQ_CODE_EOC, 0, CMDQ_EOC_IRQ_EN);
 
 	/* JUMP to end */
-	err |= cmdq_pkt_append_command(pkt, CMDQ_CODE_JUMP, 0, CMDQ_JUMP_PASS);
+	err |= cmdq_pkt_append_command(pkt, CMDQ_CODE_JUMP, 0,
+		CMDQ_JUMP_PASS >>
+		cmdq_mbox_shift(((struct cmdq_client *)pkt->cl)->chan));
 
 	return err;
 }
