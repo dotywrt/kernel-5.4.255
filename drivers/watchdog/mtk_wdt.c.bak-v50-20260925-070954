@@ -113,11 +113,6 @@ static int mtk_wdt_stop(struct watchdog_device *wdt_dev)
 	reg |= WDT_MODE_KEY;
 	iowrite32(reg, wdt_base + WDT_MODE);
 
-	/* V50-MT6890-BOOT-WDT-HANDOFF:
-	 * Keep watchdog core state synchronized with the real HW state.
-	 */
-	clear_bit(WDOG_HW_RUNNING, &wdt_dev->status);
-
 	return 0;
 }
 
@@ -136,9 +131,6 @@ static int mtk_wdt_start(struct watchdog_device *wdt_dev)
 	reg &= ~(WDT_MODE_IRQ_EN | WDT_MODE_DUAL_EN);
 	reg |= (WDT_MODE_EN | WDT_MODE_KEY);
 	iowrite32(reg, wdt_base + WDT_MODE);
-
-	/* V50: report a running HW watchdog to watchdog core. */
-	set_bit(WDOG_HW_RUNNING, &wdt_dev->status);
 
 	return 0;
 }
@@ -163,7 +155,6 @@ static int mtk_wdt_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct mtk_wdt_dev *mtk_wdt;
-	u32 reg;
 	int err;
 
 	mtk_wdt = devm_kzalloc(dev, sizeof(*mtk_wdt), GFP_KERNEL);
@@ -182,7 +173,6 @@ static int mtk_wdt_probe(struct platform_device *pdev)
 	mtk_wdt->wdt_dev.max_timeout = WDT_MAX_TIMEOUT;
 	mtk_wdt->wdt_dev.min_timeout = WDT_MIN_TIMEOUT;
 	mtk_wdt->wdt_dev.parent = dev;
-	mtk_wdt->wdt_dev.max_hw_heartbeat_ms = WDT_MAX_TIMEOUT * 1000;
 
 	watchdog_init_timeout(&mtk_wdt->wdt_dev, timeout, dev);
 	watchdog_set_nowayout(&mtk_wdt->wdt_dev, nowayout);
@@ -190,21 +180,7 @@ static int mtk_wdt_probe(struct platform_device *pdev)
 
 	watchdog_set_drvdata(&mtk_wdt->wdt_dev, mtk_wdt);
 
-	/*
-	 * V50-MT6890-BOOT-WDT-HANDOFF
-	 *
-	 * MT6890 LK/ATF may hand Linux an already-running TOPRGU watchdog.
-	 * Vendor 4.19 preserves that state and reports WDOG_HW_RUNNING so
-	 * watchdog core can keep it alive before userspace takes over.
-	 */
-	reg = readl(mtk_wdt->wdt_base + WDT_MODE);
-	if (reg & WDT_MODE_EN) {
-		set_bit(WDOG_HW_RUNNING, &mtk_wdt->wdt_dev.status);
-		mtk_wdt_ping(&mtk_wdt->wdt_dev);
-		dev_info(dev, "boot-enabled watchdog preserved and handed to watchdog core\n");
-	} else {
-		clear_bit(WDOG_HW_RUNNING, &mtk_wdt->wdt_dev.status);
-	}
+	mtk_wdt_stop(&mtk_wdt->wdt_dev);
 
 	watchdog_stop_on_reboot(&mtk_wdt->wdt_dev);
 	err = devm_watchdog_register_device(dev, &mtk_wdt->wdt_dev);
