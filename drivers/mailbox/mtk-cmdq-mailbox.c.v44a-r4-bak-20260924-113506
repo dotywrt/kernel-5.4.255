@@ -169,8 +169,7 @@ static void cmdq_task_insert_into_thread(struct cmdq_task *task)
 	dma_sync_single_for_cpu(dev, prev_task->pa_base,
 				prev_task->pkt->cmd_buf_size, DMA_TO_DEVICE);
 	prev_task_base[CMDQ_NUM_CMD(prev_task->pkt) - 1] =
-		(u64)CMDQ_JUMP_BY_PA << 32 |
-		(task->pa_base >> task->cmdq->shift_pa);
+		(u64)CMDQ_JUMP_BY_PA << 32 | task->pa_base;
 	dma_sync_single_for_device(dev, prev_task->pa_base,
 				   prev_task->pkt->cmd_buf_size, DMA_TO_DEVICE);
 
@@ -237,10 +236,8 @@ static void cmdq_task_handle_error(struct cmdq_task *task)
 	struct cmdq_thread *thread = task->thread;
 	struct cmdq_task *next_task;
 
-	
-	struct cmdq *cmdq = task->cmdq;
-dev_err(cmdq->mbox.dev, "task 0x%p error\n", task);
-	WARN_ON(cmdq_thread_suspend(cmdq, thread) < 0);
+	dev_err(task->cmdq->mbox.dev, "task 0x%p error\n", task);
+	WARN_ON(cmdq_thread_suspend(task->cmdq, thread) < 0);
 	next_task = list_first_entry_or_null(&thread->task_busy_list,
 			struct cmdq_task, list_entry);
 	if (next_task)
