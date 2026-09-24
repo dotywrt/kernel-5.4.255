@@ -43,28 +43,73 @@
 	io_pgtable_to_data(io_pgtable_ops_to_pgtable(x))
 
 /*
- * We have 32 bits total; 12 bits resolved at level 1, 8 bits at level 2,
- * and 12 bits in a page. With some carefully-chosen coefficients we can
- * hide the ugly inconsistencies behind these macros and at least let the
- * rest of the code pretend to be somewhat sane.
+ * MediaTek MT6890 vendor extension:
+ * 32-bit mode: L1 IOVA[31:20], L2 IOVA[19:12]
+ * 34-bit mode: L1 IOVA[33:20], L2 IOVA[19:12]
+ *
+ * Keep the short-descriptor level shifts at bit20/bit12. Extending the
+ * IOVA width increases the number of L1 entries from 4096 to 16384.
  */
+#if defined(CONFIG_MTK_IOMMU_PGTABLE_EXT) && \
+	(CONFIG_MTK_IOMMU_PGTABLE_EXT == 34)
+#define ARM_V7S_ADDR_BITS		34
+#else
 #define ARM_V7S_ADDR_BITS		32
-#define _ARM_V7S_LVL_BITS(lvl)		(16 - (lvl) * 4)
-#define ARM_V7S_LVL_SHIFT(lvl)		(ARM_V7S_ADDR_BITS - (4 + 8 * (lvl)))
+#endif
+
+#define _ARM_V7S_LVL_BITS_32BIT(lvl)	(16 - (lvl) * 4)
+#define _ARM_V7S_LVL_BITS_34BIT(lvl)	(20 - (lvl) * 6)
+
+/* Short-descriptor levels remain at shifts 20 and 12. */
+#define ARM_V7S_LVL_SHIFT(lvl)		(32 - (4 + 8 * (lvl)))
 #define ARM_V7S_TABLE_SHIFT		10
 
-#define ARM_V7S_PTES_PER_LVL(lvl)	(1 << _ARM_V7S_LVL_BITS(lvl))
-#define ARM_V7S_TABLE_SIZE(lvl)						\
-	(ARM_V7S_PTES_PER_LVL(lvl) * sizeof(arm_v7s_iopte))
+#define ARM_V7S_PTES_PER_LVL_32BIT(lvl) \
+	(1 << _ARM_V7S_LVL_BITS_32BIT(lvl))
+#define ARM_V7S_PTES_PER_LVL_34BIT(lvl) \
+	(1 << _ARM_V7S_LVL_BITS_34BIT(lvl))
+
+#define ARM_V7S_TABLE_SIZE_32BIT(lvl) \
+	(ARM_V7S_PTES_PER_LVL_32BIT(lvl) * sizeof(arm_v7s_iopte))
+#define ARM_V7S_TABLE_SIZE_34BIT(lvl) \
+	(ARM_V7S_PTES_PER_LVL_34BIT(lvl) * sizeof(arm_v7s_iopte))
 
 #define ARM_V7S_BLOCK_SIZE(lvl)		(1UL << ARM_V7S_LVL_SHIFT(lvl))
-#define ARM_V7S_LVL_MASK(lvl)		((u32)(~0U << ARM_V7S_LVL_SHIFT(lvl)))
+
+#define IOVA_ALIGN(addr) \
+	((u64)(addr) & DMA_BIT_MASK(ARM_V7S_ADDR_BITS))
+
+#define ARM_V7S_LVL_MASK(lvl) \
+	IOVA_ALIGN((u64)(~0ULL << ARM_V7S_LVL_SHIFT(lvl)))
 #define ARM_V7S_TABLE_MASK		((u32)(~0U << ARM_V7S_TABLE_SHIFT))
-#define _ARM_V7S_IDX_MASK(lvl)		(ARM_V7S_PTES_PER_LVL(lvl) - 1)
-#define ARM_V7S_LVL_IDX(addr, lvl)	({				\
-	int _l = lvl;							\
-	((u32)(addr) >> ARM_V7S_LVL_SHIFT(_l)) & _ARM_V7S_IDX_MASK(_l); \
+
+#define _ARM_V7S_IDX_MASK_32BIT(lvl) \
+	(ARM_V7S_PTES_PER_LVL_32BIT(lvl) - 1)
+#define _ARM_V7S_IDX_MASK_34BIT(lvl) \
+	(ARM_V7S_PTES_PER_LVL_34BIT(lvl) - 1)
+
+#define ARM_V7S_LVL_IDX_32BIT(addr, lvl) ({ \
+	int _l = lvl; \
+	((u32)(addr) >> ARM_V7S_LVL_SHIFT(_l)) & \
+		_ARM_V7S_IDX_MASK_32BIT(_l); \
 })
+
+#define ARM_V7S_LVL_IDX_34BIT(addr, lvl) ({ \
+	int _l = lvl; \
+	(((u64)(addr) & DMA_BIT_MASK(CONFIG_MTK_IOMMU_PGTABLE_EXT)) >> \
+	 ARM_V7S_LVL_SHIFT(_l)) & _ARM_V7S_IDX_MASK_34BIT(_l); \
+})
+
+#if defined(CONFIG_MTK_IOMMU_PGTABLE_EXT) && \
+	(CONFIG_MTK_IOMMU_PGTABLE_EXT == 34)
+#define ARM_V7S_PTES_PER_LVL(lvl)	ARM_V7S_PTES_PER_LVL_34BIT(lvl)
+#define ARM_V7S_TABLE_SIZE(lvl)		ARM_V7S_TABLE_SIZE_34BIT(lvl)
+#define ARM_V7S_LVL_IDX(addr, lvl)	ARM_V7S_LVL_IDX_34BIT(addr, lvl)
+#else
+#define ARM_V7S_PTES_PER_LVL(lvl)	ARM_V7S_PTES_PER_LVL_32BIT(lvl)
+#define ARM_V7S_TABLE_SIZE(lvl)		ARM_V7S_TABLE_SIZE_32BIT(lvl)
+#define ARM_V7S_LVL_IDX(addr, lvl)	ARM_V7S_LVL_IDX_32BIT(addr, lvl)
+#endif
 
 /*
  * Large page/supersection entries are effectively a block of 16 page/section
@@ -756,6 +801,7 @@ static struct io_pgtable *arm_v7s_alloc_pgtable(struct io_pgtable_cfg *cfg,
 						void *cookie)
 {
 	struct arm_v7s_io_pgtable *data;
+	u64 base;
 
 	if (cfg->ias > ARM_V7S_ADDR_BITS)
 		return NULL;
@@ -823,18 +869,38 @@ static struct io_pgtable *arm_v7s_alloc_pgtable(struct io_pgtable_cfg *cfg,
 	if (!data->pgd)
 		goto out_free_data;
 
+	base = (u64)virt_to_phys(data->pgd);
+#if defined(CONFIG_MTK_IOMMU_PGTABLE_EXT) && \
+	(CONFIG_MTK_IOMMU_PGTABLE_EXT == 34)
+	/*
+	 * 34-bit geometry has 16384 L1 entries = 64KB PGD.
+	 * MT6890 requires the root table physical address aligned to its size.
+	 */
+	if (!IS_ALIGNED(base, ARM_V7S_TABLE_SIZE(1))) {
+		pr_err("MTK IOMMU: PGD phys 0x%llx is not %zu-byte aligned\n",
+		       (unsigned long long)base, ARM_V7S_TABLE_SIZE(1));
+		__arm_v7s_free_table(data->pgd, 1, data);
+		data->pgd = NULL;
+		goto out_free_data;
+	}
+#endif
+
 	/* Ensure the empty pgd is visible before any actual TTBR write */
 	wmb();
 
 	/* TTBRs */
-	cfg->arm_v7s_cfg.ttbr[0] = virt_to_phys(data->pgd) |
+	cfg->arm_v7s_cfg.ttbr[0] = (u32)base |
 				   ARM_V7S_TTBR_S | ARM_V7S_TTBR_NOS |
 				   (cfg->coherent_walk ?
 				   (ARM_V7S_TTBR_IRGN_ATTR(ARM_V7S_RGN_WBWA) |
 				    ARM_V7S_TTBR_ORGN_ATTR(ARM_V7S_RGN_WBWA)) :
 				   (ARM_V7S_TTBR_IRGN_ATTR(ARM_V7S_RGN_NC) |
 				    ARM_V7S_TTBR_ORGN_ATTR(ARM_V7S_RGN_NC)));
+	#ifdef CONFIG_MTK_IOMMU_V2
+	cfg->arm_v7s_cfg.ttbr[1] = upper_32_bits(base);
+#else
 	cfg->arm_v7s_cfg.ttbr[1] = 0;
+#endif
 	return &data->iop;
 
 out_free_data:

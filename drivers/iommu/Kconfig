@@ -81,6 +81,21 @@ config MTK_IOMMU_V2
 
 	  if unsure, say N here.
 
+
+
+config MTK_IOMMU_PGTABLE_EXT
+	int "MTK IOMMU Page Table Extension"
+	depends on ARM || ARM64
+	depends on MTK_IOMMU_V2
+	range 32 64
+	default 32
+	help
+	  Support extended MediaTek ARMv7s page-table geometry. A value of 34
+	  provides the vendor MT6890 34-bit IOVA page-table layout while keeping
+	  the Linux 5.4 MediaTek physical-address quirk implementation.
+
+	  If unsure, use 32.
+
 endmenu
 
 config IOMMU_DEBUGFS
