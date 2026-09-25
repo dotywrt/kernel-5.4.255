@@ -1073,7 +1073,7 @@ static int mtk_pcie_setup(struct mtk_pcie_port *port)
 	if (port->port_num >= 0)
 		dev_info(dev, "host bridge domain number %d\n", port->port_num);
 /*begin: modify pcie_loopback_test,by laizhenhao,2021.06.25*/
-    memcpy(&port_tmp[port->port_num],port,sizeof(port));
+    memcpy(&port_tmp[port->port_num], port, sizeof(*port));
 /*end: modify pcie_loopback_test,by laizhenhao,2021.06.25*/
 
 	err = mtk_pcie_get_chipid(port);

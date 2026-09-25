@@ -208,7 +208,7 @@ static irqreturn_t amms_handler(int irq, void *data)
 }
 
 
-static int __init amms_probe(struct platform_device *pdev)
+static int amms_probe(struct platform_device *pdev)
 {
 
 	struct device_node *node;

@@ -34,7 +34,6 @@ static inline unsigned long get_linear_memory_size(void)
 
 /* no export symbol to aee_exception_reboot, only used in exception flow */
 /* PSCI v1.1 extended power state encoding for SYSTEM_RESET2 function */
-#define PSCI_1_1_FN_SYSTEM_RESET2       0x84000012
 #define PSCI_1_1_RESET2_TYPE_VENDOR_SHIFT   31
 #define PSCI_1_1_RESET2_TYPE_VENDOR     \
 	(1 << PSCI_1_1_RESET2_TYPE_VENDOR_SHIFT)

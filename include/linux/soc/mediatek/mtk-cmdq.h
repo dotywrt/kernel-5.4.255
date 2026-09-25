@@ -11,7 +11,9 @@
 #include <linux/mailbox/mtk-cmdq-mailbox.h>
 #include <linux/timer.h>
 
+#ifndef CMDQ_NO_TIMEOUT
 #define CMDQ_NO_TIMEOUT		0xffffffffu
+#endif
 
 struct cmdq_pkt;
 

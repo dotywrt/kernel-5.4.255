@@ -70,7 +70,7 @@ void mt_print_scp_ipi_id(unsigned int mbox)
 
 	for (i = 0; i < SCP_TOTAL_RECV_PIN; i++) {
 		if (scp_mbox_pin_recv[i].mbox == mbox) {
-			if (irq_status && 1 << scp_mbox_pin_recv[i].pin_index) {
+			if (irq_status & (1U << scp_mbox_pin_recv[i].pin_index)) {
 				pr_info("[SCP] mbox%u, ipi id %u\n",
 					mbox,
 					scp_mbox_pin_recv[i].chan_id);

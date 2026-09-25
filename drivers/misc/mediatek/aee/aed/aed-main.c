@@ -2669,7 +2669,7 @@ static void aed_hrtimer_exit(void)
 }
 /* UTC time sync end */
 
-int __init aee_parse_chosen(void)
+int aee_parse_chosen(void)
 {
 	struct device_node *node;
 	const char *aee_enable;

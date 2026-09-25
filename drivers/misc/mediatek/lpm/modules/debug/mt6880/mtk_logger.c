@@ -545,7 +545,6 @@ static u32 is_blocked_cnt;
 __weak void aee_sram_printk(const char *fmt, ...)
 {
 }
-EXPORT_SYMBOL(aee_sram_printk);
 
 
 static int mtk_show_message(struct mtk_spm_wake_status *wakesrc, int type,

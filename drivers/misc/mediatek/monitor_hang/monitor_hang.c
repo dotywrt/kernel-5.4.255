@@ -1263,7 +1263,7 @@ int hang_detect_init(void)
 	return 0;
 }
 
-extern int __init aee_parse_chosen(void);
+extern int aee_parse_chosen(void);
 
 static int __init monitor_hang_init(void)
 {

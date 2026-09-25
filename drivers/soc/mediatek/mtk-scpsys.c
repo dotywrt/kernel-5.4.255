@@ -224,8 +224,6 @@
 #define MT6779_IFR_SI0_STA			0x0
 /* donor: include/linux/soc/mediatek/infracfg.h:61 */
 #define MT6779_IFR_SI2_STA			0x28
-/* donor: include/vdso/bits.h:5 */
-#define BIT(nr)			(1UL << (nr))
 /* DOTY-MT6890-SCPSYS-EARLY-MACROS-v4-END */
 
 #define MTK_POLL_DELAY_US   10
